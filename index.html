@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Lok Harika Scientific Calculator</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      margin: 0;
+      height: 100vh;
+      background: linear-gradient(135deg, #fceabb, #f8b195);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      color: #4b2e5b;
+      -webkit-font-smoothing: antialiased;
+    }
+    .calculator {
+      background: #fff8f0;
+      border-radius: 25px;
+      box-shadow: 0 12px 30px rgba(203, 150, 167, 0.5);
+      width: 500px;
+      padding: 30px 35px;
+      user-select: none;
+    }
+    #display {
+      width: 100%;
+      height: 70px;
+      background: #f6e9f5;
+      border: none;
+      border-radius: 18px;
+      padding: 15px 25px;
+      font-size: 2.5rem;
+      text-align: right;
+      color: #4b2e5b;
+      letter-spacing: 2px;
+      box-shadow: inset 0 0 12px #f8cde6;
+      margin-bottom: 30px;
+    }
+    #display::placeholder {
+      color: #c494b9;
+    }
+    .buttons {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 12px;
+    }
+    button {
+      background: #c9aed9;
+      border: none;
+      border-radius: 14px;
+      padding: 16px 0;
+      font-size: 1.2rem;
+      color: #4b2e5b;
+      box-shadow: 0 5px 10px rgba(141, 102, 168, 0.4);
+      cursor: pointer;
+      transition: background 0.25s ease, box-shadow 0.25s ease;
+      user-select: none;
+    }
+    button:hover {
+      background: #b289d9;
+      box-shadow: 0 8px 20px rgba(141, 102, 168, 0.6);
+    }
+    button.operator {
+      background: #f7a1c4;
+      box-shadow: 0 5px 15px #f7a1c4cc;
+      color: #4b2e5b;
+      font-weight: 600;
+    }
+    button.operator:hover {
+      background: #f48bb7;
+      box-shadow: 0 8px 25px #f48bb7cc;
+    }
+    button.equals {
+      grid-column: span 2;
+      background: #ff6f91;
+      box-shadow: 0 5px 15px #ff6f91cc;
+      font-weight: 700;
+      color: #fff;
+      text-shadow: 0 0 5px #d0486a;
+    }
+    button.equals:hover {
+      background: #ff4f75;
+      box-shadow: 0 8px 25px #ff4f75cc;
+    }
+    button.zero {
+      grid-column: span 2;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="calculator">
+    <input type="text" id="display" disabled placeholder="0" />
+    <div class="buttons">
+      <button onclick="clearDisplay()">C</button>
+      <button onclick="deleteLast()">⌫</button>
+      <button onclick="toggleSign()">±</button>
+      <button onclick="percent()" class="operator">%</button>
+      <button onclick="appendValue('(')" class="operator">(</button>
+      <button onclick="appendValue(')')" class="operator">)</button>
+      <button onclick="toggleDegree()">Deg</button>
+
+      <button onclick="appendValue('7')">7</button>
+      <button onclick="appendValue('8')">8</button>
+      <button onclick="appendValue('9')">9</button>
+      <button onclick="appendValue('/')" class="operator">÷</button>
+      <button onclick="appendValue('**')" class="operator">^</button>
+      <button onclick="sqrt()" class="operator">√</button>
+      <button onclick="cubeRoot()" class="operator">³√</button>
+
+      <button onclick="appendValue('4')">4</button>
+      <button onclick="appendValue('5')">5</button>
+      <button onclick="appendValue('6')">6</button>
+      <button onclick="appendValue('*')" class="operator">×</button>
+      <button onclick="factorial()" class="operator">x!</button>
+      <button onclick="ln()" class="operator">ln</button>
+      <button onclick="log10()" class="operator">log</button>
+
+      <button onclick="appendValue('1')">1</button>
+      <button onclick="appendValue('2')">2</button>
+      <button onclick="appendValue('3')">3</button>
+      <button onclick="appendValue('-')" class="operator">−</button>
+      <button onclick="exp()" class="operator">eˣ</button>
+      <button onclick="sin()" class="operator">sin</button>
+      <button onclick="cos()" class="operator">cos</button>
+
+      <button onclick="appendValue('0')" class="zero">0</button>
+      <button onclick="appendValue('.')">.</button>
+      <button onclick="calculateResult()" class="equals">=</button>
+      <button onclick="appendValue('+')" class="operator">+</button>
+      <button onclick="tan()" class="operator">tan</button>
+      <button onclick="appendValue('Math.PI')" class="operator">π</button>
+      <button onclick="appendValue('Math.E')" class="operator">e</button>
+
+      <button onclick="square()" class="operator">x²</button>
+      <button onclick="abs()" class="operator">|x|</button>
+      <button onclick="inverse()" class="operator">1/x</button>
+      <button onclick="tenPowerX()" class="operator">10ˣ</button>
+      <button onclick="sinh()" class="operator">sinh</button>
+      <button onclick="cosh()" class="operator">cosh</button>
+      <button onclick="tanh()" class="operator">tanh</button>
+      <button onclick="floor()" class="operator">floor</button>
+      <button onclick="ceil()" class="operator">ceil</button>
+      <button onclick="random()" class="operator">Rand</button>
+    </div>
+  </div>
+
+  <script>
+    const display = document.getElementById('display');
+    let isDegree = true;
+
+    function appendValue(val) {
+      if (display.value === "0" && val === "0") return;
+      if (display.value === "0" && val !== "." && val !== "(" && !val.toString().startsWith("Math")) {
+        display.value = val;
+      } else {
+        display.value += val;
+      }
+    }
+
+    function clearDisplay() {
+      display.value = "";
+    }
+
+    function deleteLast() {
+      display.value = display.value.slice(0, -1);
+      if (display.value.length === 0) display.value = "";
+    }
+
+    function toggleSign() {
+      try {
+        if (display.value) {
+          let val = parseFloat(display.value);
+          if (!isNaN(val)) {
+            val = -val;
+            display.value = val.toString();
+          }
+        }
+      } catch {
+        display.value = "Error";
+        setTimeout(() => clearDisplay(), 1500);
+      }
+    }
+
+    function sqrt() {
+      try {
+        let val = eval(display.value);
+        if (val < 0) throw 'Error';
+        display.value = Math.sqrt(val).toFixed(7).replace(/\.?0+$/, '');
+      } catch {
+        display.value = "Error";
+        setTimeout(() => clearDisplay(), 1500);
+      }
+    }
+
+    function cubeRoot() {
+      try {
+        let val = eval(display.value);
+        display.value = Math.cbrt(val).toFixed(7).replace(/\.?0+$/, '');
+      } catch {
+        display.value = "Error";
+        setTimeout(() => clearDisplay(), 1500);
+      }
+    }
+
+    function factorial() {
+      try {
+        let val = eval(display.value);
+        if (val < 0 || !Number.isInteger(val)) throw 'Error';
+        let fact = 1;
+        for (let i = 2; i <= val; i++) fact *= i;
+        display.value = fact;
+      } catch {
+        display.value = "Error";
+        setTimeout(() => clearDisplay(), 1500);
+      }
+    }
+
+    function ln() {
+      try {
+        let val = eval(display.value);
+        if (val <= 0) throw 'Error';
+        display.value = Math.log(val).toFixed(7).replace(/\.?0+$/, '');
+      } catch {
+        display.value = "Error";
+        setTimeout(() => clearDisplay(), 1500);
+      }
+    }
+
+    function log10() {
+      try {
+        let val = eval(display.value);
+        if (val <= 0) throw 'Error';
+        display.value = Math.log10(val).toFixed(7).replace(/\.?0+$/, '');
+      } catch {
+        display.value = "Error";
+        setTimeout(() => clearDisplay(), 1500);
+      }
+    }
+
+    function exp() {
+      try {
+        let val = eval(display.value);
+        display.value = Math.exp(val).toFixed(7).replace(/\.?0+$/, '');
+      } catch {
+        display.value = "Error";
+        setTimeout(() => clearDisplay(), 1500);
+      }
+    }
+
+    function sin() {
+      try {
+        let val = eval(display.value);
+        if (isDegree) val = val * Math.PI / 180;
+        display.value = Math.sin(val).toFixed(7).replace(/\.?0+$/, '');
+      } catch {
+        display.value = "Error";
+        setTimeout(() => clearDisplay(), 1500);
+      }
+    }
+
+    function cos() {
+      try {
+        let val = eval(display.value);
+        if (isDegree) val = val * Math.PI / 180;
+        display.value = Math.cos(val).toFixed(7).replace(/\.?0+$/, '');
+      } catch {
+        display.value = "Error";
+        setTimeout(() => clearDisplay(), 1500);
+      }
+    }
+
+    function tan() {
+      try {
+        let val = eval(display.value);
+        if (isDegree) val = val * Math.PI / 180;
+        display.value = Math.tan(val).toFixed(7).replace(/\.?0+$/, '');
+      } catch {
+        display.value = "Error";
+        setTimeout(() => clearDisplay(), 1500);
+      }
+    }
+
+    function square() {
+      try {
+        let val = eval(display.value);
+        display.value = (val * val).toFixed(7).replace(/\.?0+$/, '');
+      } catch {
+        display.value = "Error";
+        setTimeout(() => clearDisplay(), 1500);
+      }
+    }
+
+    function abs() {
+      try {
+        let val = eval(display.value);
+        display.value = Math.abs(val).toString();
+      } catch {
+        display.value = "Error";
+        setTimeout(() => clearDisplay(), 1500);
+      }
+    }
+
+    function inverse() {
+      try {
+        let val = eval(display.value);
+        if (val === 0) throw 'Error';
+        display.value = (1 / val).toFixed(7).replace(/\.?0+$/, '');
+      } catch {
+        display.value = "Error";
+        setTimeout(() => clearDisplay(), 1500);
+      }
+    }
+
+    function tenPowerX() {
+      try {
+        let val = eval(display.value);
+        display.value = Math.pow(10, val).toFixed(7).replace(/\.?0+$/, '');
+      } catch {
+        display.value = "Error";
+        setTimeout(() => clearDisplay(), 1500);
+      }
+    }
+
+    function sinh() {
+      try {
+        let val = eval(display.value);
+        if (isDegree) val = val * Math.PI / 180;
+        display.value = Math.sinh(val).toFixed(7).replace(/\.?0+$/, '');
+      } catch {
+        display.value = "Error";
+        setTimeout(() => clearDisplay(), 1500);
+      }
+    }
+
+    function cosh() {
+      try {
+        let val = eval(display.value);
+        if (isDegree) val = val * Math.PI / 180;
+        display.value = Math.cosh(val).toFixed(7).replace(/\.?0+$/, '');
+      } catch {
+        display.value = "Error";
+        setTimeout(() => clearDisplay(), 1500);
+      }
+    }
+
+    function tanh() {
+      try {
+        let val = eval(display.value);
+        if (isDegree) val = val * Math.PI / 180;
+        display.value = Math.tanh(val).toFixed(7).replace(/\.?0+$/, '');
+      } catch {
+        display.value = "Error";
+        setTimeout(() => clearDisplay(), 1500);
+      }
+    }
+
+    function floor() {
+      try {
+        let val = eval(display.value);
+        display.value = Math.floor(val).toString();
+      } catch {
+        display.value = "Error";
+        setTimeout(() => clearDisplay(), 1500);
+      }
+    }
+
+    function ceil() {
+      try {
+        let val = eval(display.value);
+        display.value = Math.ceil(val).toString();
+      } catch {
+        display.value = "Error";
+        setTimeout(() => clearDisplay(), 1500);
+      }
+    }
+
+    function random() {
+      display.value = Math.random().toFixed(7);
+    }
+
+    function percent() {
+      try {
+        let val = eval(display.value);
+        display.value = (val / 100).toString();
+      } catch {
+        display.value = "Error";
+        setTimeout(() => clearDisplay(), 1500);
+      }
+    }
+
+    function toggleDegree() {
+      isDegree = !isDegree;
+      alert('Angle mode: ' + (isDegree ? 'Degrees' : 'Radians'));
+    }
+
+    function calculateResult() {
+      try {
+        let expression = display.value;
+        // Replace power operator ** if needed or any other fixes
+        let result = eval(expression);
+        display.value = result.toString();
+      } catch {
+        display.value = "Error";
+        setTimeout(() => clearDisplay(), 1500);
+      }
+    }
+  </script>
+
+</body>
+</html>
